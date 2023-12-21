@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Trình phát nhạc</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .s-choose {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .md-file-picker__label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 20px;
+      background-color: #ebebeb;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+
+    .md-file-picker__label-text {
+      font-weight: bold;
+    }
+
+    .md-file-picker__input {
+      display: none;
+    }
+
+    #audio-player {
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .song-list {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .song-list-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px;
+      background-color: #f7f7f7;
+      border-radius: 4px;
+      margin-bottom: 5px;
+    }
+
+    .song-list-item span {
+      margin-right: 10px;
+    }
+
+    .song-list-item button {
+      background-color: #f44336;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    .song-list-item.active {
+      background-color: #e3f2fd;
+    }
+  </style>
+</head>
+<body>
+  <h1>Trình phát nhạc</h1>
+
+  <div class="s-choose state">
+    <div class="md-file-picker file-picker el-dropdown">
+      <div class="el-button-group">
+        <label for="music-file-input" class="md-file-picker__label">
+          <span class="md-file-picker__label-text">Thêm bài hát</span>
+        </label>
+        <input type="file" title="" class="md-file-picker__input" id="music-file-input" multiple>
+      </div>
+    </div>
+    <div class="or-labels">
+      <div class="label-drop-file">hoặc thả tệp ở đây</div>
+    </div>
+  </div>
+
+  <ul class="song-list" id="song-list"></ul>
+
+  <audio id="audio-player" controls>
+    Trình duyệt của bạn không hỗ trợ phát nhạc.
+  </audio>
+
+  <script>
+    const fileInput = document.getElementById('music-file-input');
+    const audioPlayer = document.getElementById('audio-player');
+    const songList = document.getElementById('song-list');
+    let currentSong = null;
+
+    fileInput.addEventListener('change', function(event) {
+      const files = event.target.files;
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+
+        const songListItem = document.createElement('li');
+        songListItem.className = 'song-list-item';
+
+        const songName = document.createElement('span');
+        songName.textContent = file.name;
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Xóa';
+        deleteButton.addEventListener('click', function() {
+          songList.removeChild(songListItem);
+          if (songListItem === currentSong) {
+            currentSong = null;
+            audioPlayer.pause();
+          }
+        });
+
+        songListItem.appendChild(songName);
+        songListItem.appendChild(deleteButton);
+        songList.appendChild(songListItem);
+
+        songListItem.addEventListener('click', function() {
+          if (songListItem !== currentSong) {
+            if (currentSong !== null) {
+              currentSong.classList.remove('active');
+            }
+            currentSong = songListItem;
+            currentSong.classList.add('active');
+            audioPlayer.src = URL.createObjectURL(file);
+            audioPlayer.load();
+            audioPlayer.play();
+          }
+        });
+      }
+
+      if (songList.children.length === 1) {
+        const firstFile = files[0];
+        audioPlayer.src = URL.createObjectURL(firstFile);
+        audioPlayer.load();
+        audioPlayer.play();
+        currentSong = songList.children[0];
+        currentSong.classList.add('active');
+      }
+    });
+  </script>
+</body>
+</html>
